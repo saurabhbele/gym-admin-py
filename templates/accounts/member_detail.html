@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ member.full_name }}'s Profile{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">{{ member.full_name }}</h1>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="memberTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile Details</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance" type="button" role="tab" aria-controls="attendance" aria-selected="false">Attendance</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="workouts-tab" data-bs-toggle="tab" data-bs-target="#workouts" type="button" role="tab" aria-controls="workouts" aria-selected="false">Workout Logs</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="weight-tab" data-bs-toggle="tab" data-bs-target="#weight" type="button" role="tab" aria-controls="weight" aria-selected="false">Weight Progress</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab" aria-controls="payments" aria-selected="false">Payment History</button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="memberTabContent">
+        <!-- Profile Tab -->
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Information</h5>
+                    <form method="post" action="{% url 'edit_member' user_id=member.user.id %}">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Phone:</strong> <input type="text" name="phone_number" value="{{ member.phone_number }}" class="form-control d-inline-block w-auto"></p>
+                                <p><strong>Date of Birth:</strong> <input type="date" name="date_of_birth" value="{{ member.date_of_birth|date:'Y-m-d' }}" class="form-control d-inline-block w-auto"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Initial Weight:</strong> <input type="number" step="0.01" name="initial_weight_kg" value="{{ member.initial_weight_kg }}" class="form-control d-inline-block w-auto"> kg</p>
+                                <p><strong>Monthly Fee:</strong> $<input type="number" step="0.01" name="fees_per_month" value="{{ member.fees_per_month }}" class="form-control d-inline-block w-auto"></p>
+                                <input type="hidden" name="full_name" value="{{ member.full_name }}">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Quick Save Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between align-items-center">
+                        Attendance
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#addAttendanceForm">
+                            + Log Attendance
+                        </button>
+                    </h5>
+
+                    <div class="collapse mb-3" id="addAttendanceForm">
+                        <div class="card card-body bg-light">
+                            <form method="post" action="{% url 'add_attendance' user_id=member.user.id %}">
+                                {% csrf_token %}
+                                {{ attendance_form.as_p }}
+                                <button type="submit" class="btn btn-success btn-sm">Save Attendance</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table class="table table-sm mt-2">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in attendances %}
+                            <tr>
+                                <td>{{ log.date }}</td>
+                                <td>
+                                    {% if log.present %}
+                                        <span class="badge bg-success">Present</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Absent</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No attendance logs found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workouts Tab -->
+        <div class="tab-pane fade" id="workouts" role="tabpanel" aria-labelledby="workouts-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between align-items-center">
+                        Workout History
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#addWorkoutForm">
+                            + Log Workout
+                        </button>
+                    </h5>
+
+                    <div class="collapse mb-3" id="addWorkoutForm">
+                        <div class="card card-body bg-light">
+                            <form method="post" action="{% url 'add_exercise_log' user_id=member.user.id %}">
+                                {% csrf_token %}
+                                {{ exercise_form.as_p }}
+                                <button type="submit" class="btn btn-success btn-sm">Save Workout</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table class="table table-sm mt-2">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Exercise</th>
+                                <th>Sets</th>
+                                <th>Reps</th>
+                                <th>Weight (kg)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in exercise_logs %}
+                            <tr>
+                                <td>{{ log.date }}</td>
+                                <td>{{ log.exercise.name }}</td>
+                                <td>{{ log.sets|default_if_none:"" }}</td>
+                                <td>{{ log.reps|default_if_none:"" }}</td>
+                                <td>{{ log.weight_lifted_kg|default_if_none:"" }}</td>
+                                <td><a href="{% url 'edit_exercise_log' log_id=log.id %}" class="btn btn-sm btn-outline-primary">Edit</a></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No workout logs found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weight Progress Tab -->
+        <div class="tab-pane fade" id="weight" role="tabpanel" aria-labelledby="weight-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between align-items-center">
+                        Weight Log
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#addWeightForm">
+                            + Log Weight
+                        </button>
+                    </h5>
+
+                    <div class="collapse mb-3" id="addWeightForm">
+                        <div class="card card-body bg-light">
+                            <form method="post" action="{% url 'add_weight_log' user_id=member.user.id %}">
+                                {% csrf_token %}
+                                {{ weight_form.as_p }}
+                                <button type="submit" class="btn btn-success btn-sm">Save Weight</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table class="table mt-2">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Weight (kg)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in weight_logs %}
+                            <tr>
+                                <td>{{ log.date }}</td>
+                                <td>{{ log.weight_kg }}</td>
+                                <td><a href="{% url 'edit_weight_log' log_id=log.id %}" class="btn btn-sm btn-outline-primary">Edit</a></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No weight logs found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History Tab -->
+        <div class="tab-pane fade" id="payments" role="tabpanel" aria-labelledby="payments-tab">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between align-items-center">
+                        Payments
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#addPaymentForm">
+                            + Log Payment
+                        </button>
+                    </h5>
+
+                    <div class="collapse mb-3" id="addPaymentForm">
+                        <div class="card card-body bg-light">
+                            <form method="post" action="{% url 'add_payment' user_id=member.user.id %}">
+                                {% csrf_token %}
+                                {{ payment_form.as_p }}
+                                <button type="submit" class="btn btn-success btn-sm">Save Payment</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table class="table mt-2">
+                        <thead>
+                            <tr>
+                                <th>Month Paid For</th>
+                                <th>Amount Paid</th>
+                                <th>Payment Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.month_paid_for|date:"F Y" }}</td>
+                                <td>${{ payment.amount_paid }}</td>
+                                <td>{{ payment.payment_date }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No payment records found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary mt-4">Back to Dashboard</a>
+{% endblock %}

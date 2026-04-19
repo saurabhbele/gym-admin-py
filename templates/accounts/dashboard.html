@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Member Dashboard{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Member Dashboard</h1>
+        <a href="{% url 'add_member' %}" class="btn btn-primary btn-lg">+ Add New Member</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">All Members</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone Number</th>
+                        <th>Monthly Fee</th>
+                        <th>Payment Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in member_data %}
+                    <tr>
+                        <td>{{ data.profile.full_name }}</td>
+                        <td>{{ data.profile.phone_number }}</td>
+                        <td>${{ data.profile.fees_per_month }}</td>
+                        <td>
+                            {% if data.has_paid_current_month %}
+                                <span class="badge bg-success rounded-pill px-3 py-2">Paid</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill px-3 py-2">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'member_detail' user_id=data.profile.user.id %}" class="btn btn-sm btn-info">View Details</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No members found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
