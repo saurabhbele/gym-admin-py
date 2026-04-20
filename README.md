@@ -65,4 +65,4 @@ Access the app at `http://127.0.0.1:8000/`
 - [ ] Implement JWT Authentication
 - [ ] Integrate Stripe for Membership Payments
 - [ ] Create Trainer Dashboard
-- [ ] Implement Workout Logging API
+- [ ] Implement Workout Logging API# gym-admin-py
