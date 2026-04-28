@@ -26,6 +26,8 @@ class MemberProfile(models.Model):
     # Note: For robust admin roles, consider Django's built-in permissions/groups or user.is_staff.
     is_admin = models.BooleanField(default=False) 
 
+    has_changed_password = models.BooleanField(default=False)
+
     def __str__(self):
         return self.full_name
 
@@ -98,17 +100,41 @@ class ExerciseLog(models.Model):
 
 class Payment(models.Model):
     """
-    Tracks monthly fee payments made by members.
+    Tracks fee and deposit payments made by members.
     """
+    PAYMENT_TYPE_CHOICES = [
+        ('Monthly Fee', 'Monthly Fee'),
+        ('Deposit', 'One-Time Deposit'),
+        ('Other', 'Other')
+    ]
     member = models.ForeignKey(MemberProfile, on_delete=models.CASCADE, related_name='payments')
+    payment_type = models.CharField(max_length=50, choices=PAYMENT_TYPE_CHOICES, default='Monthly Fee')
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
     payment_date = models.DateField()
-    # Stores the first day of the month for which the payment is made, e.g., '2023-10-01' for October
-    month_paid_for = models.DateField() 
+    # Stores the first day of the month for which the payment is made. Optional for deposits.
+    month_paid_for = models.DateField(null=True, blank=True) 
 
     class Meta:
-        unique_together = ('member', 'month_paid_for') # A member can only pay for a specific month once
         ordering = ['-payment_date']
 
     def __str__(self):
-        return f"{self.member.full_name} - Paid {self.amount_paid} for {self.month_paid_for.strftime('%B %Y')}"
+        return f"{self.member.full_name} - Paid {self.amount_paid} for {self.payment_type}"
+
+class DietPlan(models.Model):
+    """
+    Stores a nutritional diet plan assigned to a specific member.
+    """
+    member = models.ForeignKey(MemberProfile, on_delete=models.CASCADE, related_name='diet_plans')
+    date_assigned = models.DateField(auto_now_add=True)
+    title = models.CharField(max_length=150, help_text="E.g., 'Weight Loss Plan (April)'")
+    breakfast = models.TextField(blank=True)
+    lunch = models.TextField(blank=True)
+    dinner = models.TextField(blank=True)
+    snacks = models.TextField(blank=True)
+    notes = models.TextField(blank=True, help_text="Additional instructions or guidelines.")
+
+    class Meta:
+        ordering = ['-date_assigned']
+
+    def __str__(self):
+        return f"{self.title} for {self.member.full_name}"

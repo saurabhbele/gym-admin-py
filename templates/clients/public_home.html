@@ -1,0 +1,98 @@
+{% extends 'public_base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Add New Gym Form -->
+    <div class="col-md-5">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Register a New Gym</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Fill out this form to provision a completely isolated PostgreSQL schema for a new gym client.</p>
+                <form method="post" action="{% url 'public_home' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Gym Display Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Unique Database Schema ID</label>
+                        {{ form.schema_name }}
+                        <div class="form-text">This cannot be changed later. Use lowercase letters and numbers only. (e.g., gym_002)</div>
+                        {% if form.schema_name.errors %}<div class="text-danger small">{{ form.schema_name.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Domain Name</label>
+                        {{ form.domain_url }}
+                        <div class="form-text">{{ form.domain_url.help_text }}</div>
+                        {% if form.domain_url.errors %}<div class="text-danger small">{{ form.domain_url.errors }}</div>{% endif %}
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">Initial Admin Account</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Admin Username</label>
+                        {{ form.admin_username }}
+                        {% if form.admin_username.errors %}<div class="text-danger small">{{ form.admin_username.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Admin Password</label>
+                        {{ form.admin_password }}
+                        {% if form.admin_password.errors %}<div class="text-danger small">{{ form.admin_password.errors }}</div>{% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Provision New Gym Schema & Admin</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: List of Existing Gyms -->
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h4 class="mb-0">Active Gym Tenants</h4>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Gym Name</th>
+                            <th>Schema ID</th>
+                            <th>Domain / URL</th>
+                            <th>Created On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tenant in tenants %}
+                        <tr>
+                            <td class="fw-bold">{{ tenant.name }}</td>
+                            <td><span class="badge bg-secondary">{{ tenant.schema_name }}</span></td>
+                            <td>
+                                {% for domain in tenant.domains.all %}
+                                    <a href="http://{{ domain.domain }}:8000" target="_blank" class="text-decoration-none">
+                                        {{ domain.domain }} &#8599;
+                                    </a><br>
+                                {% endfor %}
+                            </td>
+                            <td>{{ tenant.created_on }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No gyms registered yet. Use the form to create one!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

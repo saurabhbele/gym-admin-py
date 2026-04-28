@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import MemberProfile, WeightLog, ExerciseLog, Attendance, Payment
+from .models import MemberProfile, WeightLog, ExerciseLog, Attendance, Payment, DietPlan
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -48,8 +48,28 @@ class AttendanceForm(forms.ModelForm):
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
-        fields = ['amount_paid', 'payment_date', 'month_paid_for']
+        fields = ['payment_type', 'amount_paid', 'payment_date', 'month_paid_for']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
             'month_paid_for': forms.DateInput(attrs={'type': 'date'}),
         }
+
+class DietPlanForm(forms.ModelForm):
+    class Meta:
+        model = DietPlan
+        fields = ['title', 'breakfast', 'lunch', 'dinner', 'snacks', 'notes']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Summer Shredding Plan'}),
+            'breakfast': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'lunch': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'dinner': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'snacks': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSVImportForm(forms.Form):
+    csv_file = forms.FileField(
+        label="Select a CSV File",
+        help_text="The CSV should contain headers: username, email, full_name, phone_number, initial_weight_kg, fees_per_month",
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
