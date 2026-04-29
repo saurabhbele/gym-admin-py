@@ -11,14 +11,14 @@
                 WhatsApp Message
             </a>
             <a href="{% url 'generate_member_pdf' user_id=member.user.id %}" target="_blank" class="btn btn-outline-primary btn-sm me-2">
-                Generate Monthly Report
+                Download Monthly Report (CSV)
             </a>
             <a href="{% url 'admin_reset_password' user_id=member.user.id %}" class="btn btn-outline-danger btn-sm">Force Password Reset</a>
         </div>
         {% else %}
         <div>
             <a href="{% url 'generate_member_pdf' user_id=member.user.id %}" target="_blank" class="btn btn-outline-primary btn-sm">
-                Download Monthly Report
+                Download Monthly Report (CSV)
             </a>
         </div>
         {% endif %}

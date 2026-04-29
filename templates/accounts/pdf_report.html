@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Member Report</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #333;
+        }
+        h1 {
+            color: #0d6efd;
+            text-align: center;
+        }
+        h2 {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            color: #444;
+            margin-top: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .summary-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Monthly Progress Report</h1>
+        <p><strong>Member:</strong> {{ member.full_name }}</p>
+        <p><strong>Date Generated:</strong> {{ today|date:"F d, Y" }}</p>
+    </div>
+
+    <div class="summary-box">
+        <strong>Profile Summary:</strong><br>
+        Phone: {{ member.phone_number }}<br>
+        Initial Weight: {{ member.initial_weight_kg|default:"-" }} kg<br>
+        Current Monthly Fee: ₹{{ member.fees_per_month }}
+    </div>
+
+    <h2>Recent Weight Progress</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Weight (kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in weight_logs %}
+            <tr>
+                <td>{{ log.date|date:"M d, Y" }}</td>
+                <td>{{ log.weight_kg }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align: center;">No recent weight logs.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Recent Workouts</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Exercise</th>
+                <th>Sets x Reps</th>
+                <th>Weight (kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in exercise_logs %}
+            <tr>
+                <td>{{ log.date|date:"M d, Y" }}</td>
+                <td>{{ log.exercise.name }}</td>
+                <td>{{ log.sets|default:"-" }} x {{ log.reps|default:"-" }}</td>
+                <td>{{ log.weight_lifted_kg|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center;">No recent workouts logged.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Recent Attendance</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in attendances %}
+            <tr>
+                <td>{{ log.date|date:"M d, Y" }}</td>
+                <td>{% if log.present %}Present{% else %}Absent{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align: center;">No recent attendance logs.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Recent Payments</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Month Paid For</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                <td>{{ payment.payment_type }}</td>
+                <td>₹{{ payment.amount_paid }}</td>
+                <td>{{ payment.month_paid_for|date:"F Y"|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center;">No recent payments.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

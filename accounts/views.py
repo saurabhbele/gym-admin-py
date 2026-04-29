@@ -7,10 +7,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
+from django.http import HttpResponse
 from .models import MemberProfile, WeightLog, Payment, ExerciseLog, Exercise, Attendance, DietPlan
 from .forms import MemberProfileForm, WeightLogForm, ExerciseLogForm, UserForm, AttendanceForm, PaymentForm, CSVImportForm, DietPlanForm
 from datetime import date
-from .utils import render_to_pdf # Custom utility for PDF generation
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
@@ -376,8 +376,9 @@ def import_members(request):
 @login_required
 def generate_member_pdf(request, user_id):
     """
-    Generates a PDF report for a specific member.
+    Generates a simple CSV report for a specific member.
     Accessible by the admin or the member themselves.
+    Replaced PDF with CSV for Vercel Serverless compatibility.
     """
     member = get_object_or_404(MemberProfile, user_id=user_id)
     
@@ -386,29 +387,43 @@ def generate_member_pdf(request, user_id):
         messages.error(request, "You do not have permission to view this report.")
         return redirect('dashboard')
 
-    # Get data for the report (e.g., last 30 days, or just all for simplicity)
-    weight_logs = WeightLog.objects.filter(member=member).order_by('-date')[:10]
-    payments = Payment.objects.filter(member=member).order_by('-payment_date')[:5]
-    exercise_logs = ExerciseLog.objects.filter(member=member).order_by('-date')[:20]
+    # Get data for the report
+    weight_logs = WeightLog.objects.filter(member=member).order_by('-date')[:30]
+    payments = Payment.objects.filter(member=member).order_by('-payment_date')[:12]
+    exercise_logs = ExerciseLog.objects.filter(member=member).order_by('-date')[:50]
     attendances = Attendance.objects.filter(member=member).order_by('-date')[:30]
 
-    context = {
-        'member': member,
-        'weight_logs': weight_logs,
-        'payments': payments,
-        'exercise_logs': exercise_logs,
-        'attendances': attendances,
-        'today': date.today(),
-    }
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="Report_{member.full_name.replace(" ", "_")}_{date.today()}.csv"'},
+    )
+
+    writer = csv.writer(response)
+    writer.writerow([f"Monthly Progress Report for {member.full_name}"])
+    writer.writerow([])
     
-    pdf = render_to_pdf('accounts/pdf_report.html', context)
-    if pdf:
-        response = HttpResponse(pdf, content_type='application/pdf')
-        filename = f"Report_{member.full_name.replace(' ', '_')}_{date.today()}.pdf"
-        # Uncomment the line below to force download instead of viewing in browser
-        # response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        response['Content-Disposition'] = f'inline; filename="{filename}"'
-        return response
-    
-    messages.error(request, "Error generating PDF report.")
-    return redirect('member_detail', user_id=user_id)
+    writer.writerow(["=== WEIGHT PROGRESS ==="])
+    writer.writerow(["Date", "Weight (kg)"])
+    for log in weight_logs:
+        writer.writerow([log.date, log.weight_kg])
+    writer.writerow([])
+
+    writer.writerow(["=== RECENT WORKOUTS ==="])
+    writer.writerow(["Date", "Exercise", "Sets x Reps", "Weight (kg)"])
+    for log in exercise_logs:
+        writer.writerow([log.date, log.exercise.name, f"{log.sets} x {log.reps}", log.weight_lifted_kg])
+    writer.writerow([])
+
+    writer.writerow(["=== ATTENDANCE ==="])
+    writer.writerow(["Date", "Status"])
+    for log in attendances:
+        writer.writerow([log.date, "Present" if log.present else "Absent"])
+    writer.writerow([])
+
+    writer.writerow(["=== PAYMENTS ==="])
+    writer.writerow(["Date", "Type", "Amount Paid", "Month Paid For"])
+    for p in payments:
+        writer.writerow([p.payment_date, p.payment_type, p.amount_paid, p.month_paid_for])
+
+    return response
