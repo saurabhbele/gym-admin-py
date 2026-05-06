@@ -1,17 +1,65 @@
 {% extends 'base.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login - AD's Fitness World{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<style>
+    /* Custom styling for the branded login page */
+    body {
+        /* This loads a random high-quality gym image from Unsplash every time the page refreshes */
+        background-image: url('https://source.unsplash.com/1600x900/?gym,fitness,workout');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+
+    /* We add a dark overlay to make the text and login card readable against the busy background */
+    .login-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: -1;
+    }
+
+    .login-card {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    /* Hide the navbar on the login screen for a cleaner look */
+    .navbar {
+        display: none !important;
+    }
+
+    /* Ensure the main container takes up the full height so we can center the card vertically */
+    main.container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<div class="login-overlay"></div>
+
+<div class="row justify-content-center w-100">
     <div class="col-md-6 col-lg-4">
-        <h2 class="text-center mb-4">Login</h2>
-        <div class="card shadow-sm">
+        <div class="card login-card p-4">
             <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-primary">AD's Fitness World</h2>
+                    <p class="text-muted">Member & Admin Portal</p>
+                </div>
+
                 <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Login</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-3 fw-bold">Login</button>
                 </form>
             </div>
         </div>
