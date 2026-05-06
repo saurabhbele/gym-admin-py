@@ -1,5 +1,5 @@
 from django.db import models
-from django_tenants.models import TenantMixin, DomainMixin
+from django_tenants.models import TenantMixin
 
 class Client(TenantMixin):
     name = models.CharField(max_length=100)
@@ -11,5 +11,6 @@ class Client(TenantMixin):
     def __str__(self):
         return f"{self.name} ({self.schema_name})"
 
-class Domain(DomainMixin):
-    pass
+# Domain model is not needed for subfolder routing
+# class Domain(DomainMixin):
+#     pass

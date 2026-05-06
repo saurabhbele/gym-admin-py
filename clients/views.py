@@ -1,15 +1,23 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django_tenants.utils import schema_context
 from django.contrib.auth.models import User
 from accounts.models import MemberProfile
 from .forms import TenantForm
-from .models import Client, Domain
+from .models import Client
 
+def is_platform_admin(user):
+    # This checks if the user is authenticated and is a superuser in the 'public' schema
+    return user.is_authenticated and user.is_superuser
+
+@login_required
+@user_passes_test(is_platform_admin)
 def public_home(request):
     """
     This is the main landing page for your SaaS platform (e.g., gymsaas.com).
     It handles registering new gyms (tenants).
+    Accessible only by platform superusers.
     """
     if request.method == 'POST':
         form = TenantForm(request.POST)
@@ -19,15 +27,8 @@ def public_home(request):
                 tenant = form.save(commit=False)
                 tenant.save()
 
-                # 2. Link a domain to the tenant
-                domain_url = form.cleaned_data['domain_url']
-                Domain.objects.create(
-                    domain=domain_url,
-                    tenant=tenant,
-                    is_primary=True
-                )
-                
-                # 3. Provision the initial admin user inside the new tenant schema
+                # Domain creation is removed for subfolder routing
+                # 2. Provision the initial admin user inside the new tenant schema
                 admin_user = form.cleaned_data['admin_username']
                 admin_pass = form.cleaned_data['admin_password']
                 
@@ -49,7 +50,7 @@ def public_home(request):
                         has_changed_password=True # Don't force password change
                     )
 
-                messages.success(request, f"Successfully created new gym schema: {tenant.name}! You can now visit http://{domain_url}:8000 and login with '{admin_user}'.")
+                messages.success(request, f"Successfully created new gym schema: {tenant.name}! Access it at /gyms/{tenant.schema_name}/ and login with '{admin_user}'.")
                 return redirect('public_home')
                 
             except Exception as e:

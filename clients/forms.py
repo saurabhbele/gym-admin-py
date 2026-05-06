@@ -1,14 +1,10 @@
 from django import forms
-from .models import Client, Domain
+from .models import Client
 
 class TenantForm(forms.ModelForm):
-    domain_url = forms.CharField(
-        max_length=253, 
-        help_text="e.g., gym2.localhost (for local testing) or gym2.yourdomain.com (for production)",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
+    # domain_url is removed for subfolder routing
     
-    # New fields for the initial admin user
+    # Fields for the initial admin user
     admin_username = forms.CharField(
         max_length=150,
         required=True,

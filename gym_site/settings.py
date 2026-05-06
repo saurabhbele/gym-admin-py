@@ -35,43 +35,21 @@ if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Application definition
-# django-tenants specific apps configuration
-SHARED_APPS = (
-    'django_tenants',  # mandatory
-    'clients', # you must list the app where your tenant model resides in
-
-    'django.contrib.contenttypes',
+INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.admin',
     'django.contrib.staticfiles',
+    'accounts.apps.AccountsConfig',
     
     # 3rd Party Apps for API
     'rest_framework',
     'rest_framework.authtoken', # For Token Authentication
-)
-
-TENANT_APPS = (
-    # The following Django contrib apps must be in TENANT_APPS
-    'django.contrib.contenttypes',
-    'django.contrib.auth',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.admin',
-    'django.contrib.staticfiles',
-
-    # your tenant-specific apps
-    'accounts.apps.AccountsConfig', 
-)
-
-INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
-
-TENANT_MODEL = "clients.Client" # app.Model
-TENANT_DOMAIN_MODEL = "clients.Domain" # app.Model
+]
 
 MIDDLEWARE = [
-    'django_tenants.middleware.main.TenantMainMiddleware', # Must be at the top
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # Add whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -83,7 +61,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'gym_site.urls'
-PUBLIC_SCHEMA_URLCONF = 'gym_site.public_urls'
 
 TEMPLATES = [
     {
@@ -106,18 +83,11 @@ WSGI_APPLICATION = 'gym_site.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASE_ROUTERS = (
-    'django_tenants.routers.TenantSyncRouter',
-)
-
-# You must have PostgreSQL running locally to use schemas.
-# Replace with your actual local DB credentials for local development.
-# In production (Vercel/Render), it uses the DATABASE_URL environment variable.
+# Use sqlite for local development, Postgres for production (Vercel)
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://gym_admin:supersecretpassword@localhost:5432/gym_saas',
-        conn_max_age=600,
-        engine='django_tenants.postgresql_backend' # Crucial for django-tenants
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
     )
 }
 

@@ -26,13 +26,6 @@
                         {% if form.schema_name.errors %}<div class="text-danger small">{{ form.schema_name.errors }}</div>{% endif %}
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Domain Name</label>
-                        {{ form.domain_url }}
-                        <div class="form-text">{{ form.domain_url.help_text }}</div>
-                        {% if form.domain_url.errors %}<div class="text-danger small">{{ form.domain_url.errors }}</div>{% endif %}
-                    </div>
-
                     <hr>
                     <h5 class="mb-3">Initial Admin Account</h5>
 
@@ -66,7 +59,7 @@
                         <tr>
                             <th>Gym Name</th>
                             <th>Schema ID</th>
-                            <th>Domain / URL</th>
+                            <th>Access URL</th>
                             <th>Created On</th>
                         </tr>
                     </thead>
@@ -76,11 +69,9 @@
                             <td class="fw-bold">{{ tenant.name }}</td>
                             <td><span class="badge bg-secondary">{{ tenant.schema_name }}</span></td>
                             <td>
-                                {% for domain in tenant.domains.all %}
-                                    <a href="http://{{ domain.domain }}:8000" target="_blank" class="text-decoration-none">
-                                        {{ domain.domain }} &#8599;
-                                    </a><br>
-                                {% endfor %}
+                                <a href="/gyms/{{ tenant.schema_name }}/" target="_blank" class="text-decoration-none">
+                                    /gyms/{{ tenant.schema_name }}/ &#8599;
+                                </a>
                             </td>
                             <td>{{ tenant.created_on }}</td>
                         </tr>
