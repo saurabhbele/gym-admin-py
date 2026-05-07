@@ -3,14 +3,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Gym Site{% endblock %}</title>
+    <title>{% block title %}AD's Fitness World{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .custom-navbar {
+            background-color: #1a1a1a;
+            border-bottom: 3px solid #0d6efd;
+        }
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">Gym Site</a>
+            <a class="navbar-brand text-primary" href="{% url 'dashboard' %}">
+                <i class="bi bi-activity"></i> AD's Fitness World
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -18,23 +31,23 @@
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                            <a class="nav-link fw-semibold" href="{% url 'dashboard' %}">Dashboard</a>
                         </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Hello, {{ user.first_name|default:user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'change_password' %}">Change Password</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" action="{% url 'logout' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="dropdown-item">Logout</button>
+                                        <button type="submit" class="dropdown-item text-danger fw-bold">Logout</button>
                                     </form>
                                 </li>
                             </ul>
@@ -49,10 +62,23 @@
         </div>
     </nav>
 
+    {% if user.is_authenticated %}
+    <!-- Gym Hero Banner (Visible only when logged in) -->
+    <div class="container-fluid p-0 mb-4 position-relative">
+        <div style="height: 200px; overflow: hidden;">
+            <img src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2000&auto=format&fit=crop" class="w-100" style="object-fit: cover; object-position: center 30%;" alt="Gym Equipment">
+        </div>
+        <div class="position-absolute top-50 start-50 translate-middle text-center w-100" style="background: rgba(0,0,0,0.5); padding: 20px 0;">
+            <h2 class="text-white fw-bold mb-0" style="text-transform: uppercase; letter-spacing: 2px;">Welcome to AD's Fitness World</h2>
+            <p class="text-white-50 mb-0">Push harder than yesterday.</p>
+        </div>
+    </div>
+    {% endif %}
+
     <main class="container mt-4">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -64,6 +90,8 @@
         {% endblock %}
     </main>
 
+    <!-- Bootstrap Icons (Optional, but looks nice) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
