@@ -33,6 +33,10 @@ class ExerciseAdmin(admin.ModelAdmin):
     list_display = ('name', 'body_part')
     list_filter = ('body_part',)
     search_fields = ('name',)
+    
+    # Prevent admins from accidentally deleting exercises and destroying historical log data
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(ExerciseLog)
 class ExerciseLogAdmin(admin.ModelAdmin):
