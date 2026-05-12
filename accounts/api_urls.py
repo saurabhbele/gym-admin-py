@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import api_views
-from rest_framework.authtoken.views import obtain_auth_token
+# from rest_framework.authtoken.views import obtain_auth_token # No longer needed, using custom view
 
 router = DefaultRouter()
 router.register(r'members', api_views.MemberProfileViewSet, basename='member')
@@ -11,6 +11,6 @@ router.register(r'payments', api_views.PaymentViewSet, basename='payment')
 router.register(r'exercises', api_views.ExerciseViewSet, basename='exercise')
 
 urlpatterns = [
-    path('login/', obtain_auth_token, name='api_login'), # Changed from get-token to login
+    path('login/', api_views.CustomAuthToken.as_view(), name='api_login'), # Pointing to our custom view
     path('', include(router.urls)),
 ]

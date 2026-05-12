@@ -1,4 +1,8 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+
 from .models import MemberProfile, WeightLog, ExerciseLog, Payment, Exercise
 from .serializers import (
     MemberProfileSerializer, 
@@ -31,6 +35,23 @@ class IsAdminOrOwner(permissions.BasePermission):
             return obj.user == request.user
         # For other objects, check if the object's member is the request user
         return obj.member.user == request.user
+
+class CustomAuthToken(ObtainAuthToken):
+    """
+    Custom login view that returns the user's token, username, and is_staff status.
+    """
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+            'is_staff': user.is_staff
+        })
 
 class MemberProfileViewSet(viewsets.ModelViewSet):
     queryset = MemberProfile.objects.all()
