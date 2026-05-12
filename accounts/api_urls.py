@@ -11,6 +11,6 @@ router.register(r'payments', api_views.PaymentViewSet, basename='payment')
 router.register(r'exercises', api_views.ExerciseViewSet, basename='exercise')
 
 urlpatterns = [
-    path('get-token/', obtain_auth_token, name='api_token_auth'),
+    path('login/', obtain_auth_token, name='api_login'), # Changed from get-token to login
     path('', include(router.urls)),
 ]
