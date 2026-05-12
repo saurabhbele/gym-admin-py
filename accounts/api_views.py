@@ -1,7 +1,8 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from django.shortcuts import get_object_or_404
 
 from .models import MemberProfile, WeightLog, ExerciseLog, Payment, Exercise
 from .serializers import (
@@ -52,6 +53,17 @@ class CustomAuthToken(ObtainAuthToken):
             'username': user.username,
             'is_staff': user.is_staff
         })
+
+class CurrentMemberProfileView(generics.RetrieveAPIView):
+    """
+    Returns the profile of the currently logged-in user.
+    """
+    serializer_class = MemberProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # Return the MemberProfile associated with the authenticated user
+        return get_object_or_404(MemberProfile, user=self.request.user)
 
 class MemberProfileViewSet(viewsets.ModelViewSet):
     queryset = MemberProfile.objects.all()
